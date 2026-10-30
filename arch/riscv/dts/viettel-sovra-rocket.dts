@@ -1,0 +1,87 @@
+// SPDX-License-Identifier: GPL-2.0+
+/*
+ * Viettel SOVRA Rocket (CVA6) ZCU102 control DT.
+ *
+ * The 500 kHz timebase and addresses below are inherited from the previous
+ * Rocket profile. They are build-time placeholders only until RTL/FPGA
+ * evidence confirms every value. Do not claim board validation from this DT.
+ */
+/dts-v1/;
+
+/ {
+	#address-cells = <2>;
+	#size-cells = <2>;
+	compatible = "viettel,sovra-cva6-zcu102", "ucb-bar,chipyard-dev";
+	model = "Viettel SOVRA Rocket (CVA6) ZCU102";
+
+	aliases {
+		serial0 = &uart0;
+	};
+
+	chosen {
+		stdout-path = &uart0;
+		bootargs = "root=/dev/ram rw console=ttySIF0,115200 earlycon=sbi";
+	};
+
+	cpus {
+		#address-cells = <1>;
+		#size-cells = <0>;
+		timebase-frequency = <500000>; /* TBD_HW: verify against RTL */
+
+		cpu0: cpu@0 {
+			compatible = "openhwgroup,cva6", "riscv";
+			device_type = "cpu";
+			reg = <0>;
+			mmu-type = "riscv,sv39";
+			riscv,isa = "rv64imafdczicsr_zifencei";
+			status = "okay";
+			cpu0_intc: interrupt-controller {
+				#interrupt-cells = <1>;
+				compatible = "riscv,cpu-intc";
+				interrupt-controller;
+			};
+		};
+	};
+
+	memory@80000000 {
+		device_type = "memory";
+		reg = <0x0 0x80000000 0x0 0x80000000>; /* TBD_HW: verify size */
+	};
+
+	soc {
+		#address-cells = <1>;
+		#size-cells = <1>;
+		compatible = "ucb-bar,chipyard-soc", "simple-bus";
+		ranges = <0x0 0x0 0x0 0x20000000>;
+
+		pbus_clock: pbus-clock {
+			#clock-cells = <0>;
+			clock-frequency = <50000000>; /* TBD_HW: verify clock */
+			compatible = "fixed-clock";
+		};
+
+		clint@2000000 {
+			compatible = "riscv,clint0";
+			interrupts-extended = <&cpu0_intc 3 &cpu0_intc 7>;
+			reg = <0x02000000 0x00010000>;
+		};
+
+		plic: interrupt-controller@c000000 {
+			#interrupt-cells = <1>;
+			compatible = "riscv,plic0";
+			interrupt-controller;
+			interrupts-extended = <&cpu0_intc 11 &cpu0_intc 9>;
+			reg = <0x0c000000 0x04000000>;
+			riscv,max-priority = <3>;
+			riscv,ndev = <2>;
+		};
+
+		uart0: serial@10020000 {
+			compatible = "sifive,uart0";
+			clocks = <&pbus_clock>;
+			clock-frequency = <50000000>;
+			current-speed = <115200>;
+			reg = <0x10020000 0x1000>;
+		};
+	};
+};

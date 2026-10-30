@@ -1,0 +1,27 @@
+if TARGET_VIETTEL_SOVRA_ROCKET
+
+config SYS_BOARD
+	default "viettel_sovra_rocket"
+
+config SYS_VENDOR
+	default "viettel"
+
+config SYS_CPU
+	default "generic"
+
+config SYS_CONFIG_NAME
+	default "viettel_sovra_rocket"
+
+config TEXT_BASE
+	default 0x80200000 if RISCV_SMODE
+	default 0x80000000 if !RISCV_SMODE
+
+config BOARD_SPECIFIC_OPTIONS # dummy
+	def_bool y
+	select GENERIC_RISCV
+	select RISCV_TIMER
+	select SIFIVE_SERIAL
+	select SYSRESET
+	select SYSRESET_SBI
+
+endif

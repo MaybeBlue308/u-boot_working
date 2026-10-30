@@ -20,6 +20,12 @@ config TARGET_OPENPITON_RISCV64
 config TARGET_QEMU_VIRT
 	bool "Support QEMU Virt Board"
 
+config TARGET_VIETTEL_SOVRA_ROCKET
+	bool "Support Viettel SOVRA Rocket (CVA6) ZCU102 board"
+	help
+	  Select this for the Viettel SOVRA CVA6 configuration running on
+	  the ZCU102 platform.
+
 config TARGET_SIFIVE_UNLEASHED
 	bool "Support SiFive Unleashed Board"
 
@@ -77,6 +83,7 @@ source "board/AndesTech/ae350/Kconfig"
 source "board/emulation/qemu-riscv/Kconfig"
 source "board/microchip/mpfs_icicle/Kconfig"
 source "board/openpiton/riscv64/Kconfig"
+source "board/viettel/viettel_sovra_rocket/Kconfig"
 source "board/sifive/unleashed/Kconfig"
 source "board/sifive/unmatched/Kconfig"
 source "board/sipeed/maix/Kconfig"
