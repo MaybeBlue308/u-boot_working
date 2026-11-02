@@ -486,10 +486,14 @@ const char *bootdelay_process(void)
 
 void autoboot_command(const char *s)
 {
+	bool aborted = false;
+
 	debug("### main_loop: bootcmd=\"%s\"\n", s ? s : "<UNDEFINED>");
 
-	if (s && (stored_bootdelay == -2 ||
-		 (stored_bootdelay != -1 && !abortboot(stored_bootdelay)))) {
+	if (s && stored_bootdelay != -1 && stored_bootdelay != -2)
+		aborted = abortboot(stored_bootdelay);
+
+	if (s && stored_bootdelay != -1 && !aborted) {
 		bool lock;
 		int prev;
 
@@ -504,7 +508,11 @@ void autoboot_command(const char *s)
 			disable_ctrlc(prev);	/* restore Ctrl-C checking */
 	}
 
-	if (IS_ENABLED(CONFIG_AUTOBOOT_USE_MENUKEY) &&
+	if (IS_ENABLED(CONFIG_VIETTEL_SOVRA_ROCKET_MENU_ON_ABORT) && aborted) {
+		s = env_get("menucmd");
+		if (s)
+			run_command_list(s, -1, 0);
+	} else if (IS_ENABLED(CONFIG_AUTOBOOT_USE_MENUKEY) &&
 	    menukey == AUTOBOOT_MENUKEY) {
 		s = env_get("menucmd");
 		if (s)

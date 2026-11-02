@@ -1366,6 +1366,12 @@ config AUTOBOOT_MENUKEY
 	  For example, 33 means "!" in ASCII, so pressing ! at boot would take
 	  this action.
 
+config VIETTEL_SOVRA_ROCKET_MENU_ON_ABORT
+	bool "Open SOVRA boot menu when autoboot is interrupted"
+	depends on TARGET_VIETTEL_SOVRA_ROCKET && CMD_BOOTMENU && !AUTOBOOT_KEYED
+	help
+	  Run menucmd when a key interrupts the autoboot countdown.
+
 config AUTOBOOT_MENU_SHOW
 	bool "Show a menu on boot"
 	depends on CMD_BOOTMENU
