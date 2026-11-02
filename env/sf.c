@@ -69,6 +69,7 @@ static int setup_flash_device(struct spi_flash **env_flash)
 static int env_sf_save(void)
 {
 	env_t	env_new;
+	env_t	*readback = NULL;
 	char	*saved_buffer = NULL, flag = ENV_REDUND_OBSOLETE;
 	u32	saved_size = 0, saved_offset = 0, sector;
 	u32	sect_size = CONFIG_ENV_SECT_SIZE;
@@ -82,9 +83,24 @@ static int env_sf_save(void)
 	if (IS_ENABLED(CONFIG_ENV_SECT_SIZE_AUTO))
 		sect_size = env_flash->mtd.erasesize;
 
+	if (IS_ENABLED(CONFIG_TARGET_VIETTEL_SOVRA_ROCKET)) {
+		if (!sect_size || CONFIG_ENV_OFFSET % sect_size ||
+		    CONFIG_ENV_OFFSET_REDUND % sect_size ||
+		    DIV_ROUND_UP(CONFIG_ENV_SIZE, sect_size) * (u64)sect_size >
+		    CONFIG_ENV_OFFSET_REDUND - CONFIG_ENV_OFFSET) {
+			puts("Invalid environment erase geometry\n");
+			ret = -EINVAL;
+			goto done;
+		}
+		readback = memalign(ARCH_DMA_MINALIGN, CONFIG_ENV_SIZE);
+		if (!readback) {
+			ret = -ENOMEM;
+			goto done;
+		}
+	}
 	ret = env_export(&env_new);
 	if (ret)
-		return -EIO;
+		goto done;
 	env_new.flags	= ENV_REDUND_ACTIVE;
 
 	if (gd->env_valid == ENV_VALID) {
@@ -132,6 +148,19 @@ static int env_sf_save(void)
 			goto done;
 	}
 
+	/* Verify before retiring the old copy. */
+	if (readback) {
+		ret = spi_flash_read(env_flash, env_new_offset, CONFIG_ENV_SIZE,
+				     readback);
+		if (ret)
+			goto done;
+		if (memcmp(readback, &env_new, CONFIG_ENV_SIZE)) {
+			puts("Environment readback mismatch; old copy retained\n");
+			ret = -EIO;
+			goto done;
+		}
+	}
+
 	ret = spi_flash_write(env_flash, env_offset + offsetof(env_t, flags),
 				sizeof(env_new.flags), &flag);
 	if (ret)
@@ -145,6 +174,7 @@ static int env_sf_save(void)
 
 done:
 	spi_flash_free(env_flash);
+	free(readback);
 
 	if (saved_buffer)
 		free(saved_buffer);
