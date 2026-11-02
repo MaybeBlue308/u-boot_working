@@ -9,7 +9,7 @@ int board_init(void)
 
 int checkboard(void)
 {
-	puts("Board: Viettel SOVRA Rocket (CVA6) ZCU102\n");
+	puts("Board: Viettel SOVRA Rocket ZCU102\n");
 
 	return 0;
 }

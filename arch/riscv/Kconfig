@@ -21,9 +21,9 @@ config TARGET_QEMU_VIRT
 	bool "Support QEMU Virt Board"
 
 config TARGET_VIETTEL_SOVRA_ROCKET
-	bool "Support Viettel SOVRA Rocket (CVA6) ZCU102 board"
+	bool "Support Viettel SOVRA Rocket ZCU102 board"
 	help
-	  Select this for the Viettel SOVRA CVA6 configuration running on
+	  Select this for the Viettel SOVRA Rocket configuration running on
 	  the ZCU102 platform.
 
 config TARGET_SIFIVE_UNLEASHED
